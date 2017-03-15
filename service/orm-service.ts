@@ -8,6 +8,7 @@ import { Console }      from '@lyrics/core';
 import { Inject }       from '@lyrics/routing';
 import { Sequelize }    from 'sequelize';
 import { Service, ServiceInterface } from '@lyrics/component';
+import { DependencyLoader }          from '@lyrics/core';
 
 @Inject([
     { config: '%framework.database%' }, // value from config.*.yml
@@ -27,7 +28,14 @@ export class OrmService extends Service implements ServiceInterface
 
     // dependencies (inject) were injected by the container
     onInit() {
+        // check the config exists
+        if (this.injected.config === null) {
+            Console.error(`orm-service: missing configuration values for framework.database item`);
+            return;
+        }
+        
         this.setupOrm();
+        DependencyLoader.readBundles('OrmBundle', ['model']);
     }
 
     setupOrm() {
